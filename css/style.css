@@ -1,0 +1,290 @@
+:root {
+  --bg:        #0c0d10;
+  --panel:     #121419;
+  --line:      #1f222b;
+  --fg:        #e8e9ed;
+  --dim:       #777f8d;
+  --dimmer:    #4b5260;
+  --accent:    #5eead4;
+  --ready:     #34d399;
+  --holding:   #f87171;
+  --warn:      #fbbf24;
+  --radius:    10px;
+
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--mono);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+body {
+  /* Sin seleccion accidental al mantener pulsado para cronometrar. */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: border-color .12s, color .12s;
+}
+button:hover:not(:disabled) { border-color: var(--dimmer); }
+button:disabled { color: var(--dimmer); cursor: default; }
+
+input, select, textarea {
+  font: inherit;
+  color: var(--fg);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 8px 10px;
+  width: 100%;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* ================= layout ================= */
+
+.app {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  height: 100dvh;
+}
+
+.sidebar {
+  border-right: 1px solid var(--line);
+  background: var(--panel);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.main {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 0;
+  min-width: 0;
+}
+
+/* ================= scramble ================= */
+
+.scramble {
+  padding: 28px 24px 8px;
+  text-align: center;
+}
+
+.scramble-text {
+  font-size: clamp(15px, 2.1vw, 22px);
+  line-height: 1.55;
+  letter-spacing: .04em;
+  max-width: 740px;
+  margin: 0 auto;
+  word-spacing: .35em;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.scramble-meta {
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--dimmer);
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  align-items: center;
+}
+
+.badge-fallback { color: var(--warn); }
+
+/* ================= cronometro ================= */
+
+.timer-surface {
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  touch-action: none;   /* sin scroll ni zoom accidental al cronometrar */
+  min-height: 0;
+}
+
+.time {
+  font-size: clamp(64px, 17vw, 168px);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  /* Sin esto los digitos bailan al cambiar y queda fatal. */
+  font-variant-numeric: tabular-nums;
+  transition: color .08s;
+}
+
+.time.holding { color: var(--holding); }
+.time.ready   { color: var(--ready); }
+
+.hint {
+  margin-top: 18px;
+  font-size: 12px;
+  color: var(--dimmer);
+  text-align: center;
+  height: 16px;
+}
+
+/* ================= estadisticas ================= */
+
+.stats {
+  border-top: 1px solid var(--line);
+  padding: 14px 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  gap: 10px 18px;
+}
+
+.stat { text-align: center; }
+.stat-label { font-size: 10px; color: var(--dimmer); text-transform: uppercase; letter-spacing: .08em; }
+.stat-value { font-size: 17px; margin-top: 3px; font-variant-numeric: tabular-nums; }
+
+/* ================= lista de solves ================= */
+
+.sidebar-head {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.sidebar-head select { flex: 1; }
+
+.solve-list {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.solve-row {
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+  cursor: pointer;
+}
+.solve-row:hover { background: #171a21; }
+.solve-index { color: var(--dimmer); font-size: 11px; }
+.solve-time { font-variant-numeric: tabular-nums; }
+.solve-time.dnf { color: var(--holding); }
+.solve-time.plus2 { color: var(--warn); }
+.solve-actions { display: flex; gap: 4px; opacity: 0; transition: opacity .12s; }
+.solve-row:hover .solve-actions { opacity: 1; }
+.solve-actions button { padding: 2px 7px; font-size: 11px; border-radius: 5px; }
+
+.empty {
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--dimmer);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.sidebar-foot {
+  border-top: 1px solid var(--line);
+  padding: 10px 16px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 11px;
+  color: var(--dimmer);
+}
+
+.sync-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--dimmer);
+  flex: none;
+}
+.sync-dot.ok     { background: var(--ready); }
+.sync-dot.error  { background: var(--holding); }
+.sync-dot.pending{ background: var(--warn); }
+.sync-label { flex: 1; }
+.sidebar-foot button { padding: 4px 9px; font-size: 11px; }
+
+/* ============ ocultar todo mientras se resuelve ============ */
+
+body.running .sidebar,
+body.running .scramble,
+body.running .stats,
+body.running .hint {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s;
+}
+
+/* ================= modal ================= */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.65);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  z-index: 50;
+}
+.modal-backdrop[hidden] { display: none; }
+
+.modal {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 22px;
+  width: min(460px, 100%);
+  max-height: 85dvh;
+  overflow-y: auto;
+}
+.modal h2 { margin: 0 0 4px; font-size: 16px; font-weight: 600; }
+.modal .sub { margin: 0 0 18px; font-size: 12px; color: var(--dim); line-height: 1.5; }
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 11px; color: var(--dim); margin-bottom: 5px; }
+.field .help { font-size: 11px; color: var(--dimmer); margin-top: 5px; line-height: 1.5; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
+
+.kv { display: flex; justify-content: space-between; font-size: 12px; padding: 7px 0; border-bottom: 1px solid var(--line); }
+.kv span:first-child { color: var(--dim); }
+
+/* ================= movil ================= */
+
+@media (max-width: 820px) {
+  .app {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+  }
+  .main { grid-row: 1; }
+  .sidebar {
+    grid-row: 2;
+    border-right: none;
+    border-top: 1px solid var(--line);
+    max-height: 42dvh;
+  }
+  .scramble { padding: 18px 16px 4px; }
+  .stats { padding: 10px 14px; gap: 8px 12px; }
+  .stat-value { font-size: 15px; }
+  .hint { display: none; }
+  .solve-actions { opacity: 1; }
+}
+
+@media (max-width: 820px) {
+  body.running .sidebar { max-height: 0; overflow: hidden; }
+}

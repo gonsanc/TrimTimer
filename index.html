@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0c0d10">
+<meta name="description" content="Cronometro de speedcubing local-first. Tus tiempos son tuyos.">
+<title>TrimTimer</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="sidebar-head">
+      <select id="session-select" aria-label="Sesion"></select>
+      <button id="new-session" title="Nueva sesion">+</button>
+      <button id="open-settings" title="Ajustes">⚙</button>
+    </div>
+
+    <div class="solve-list" id="solve-list"></div>
+
+    <div class="sidebar-foot">
+      <span class="sync-dot" id="sync-dot"></span>
+      <span class="sync-label" id="sync-label">—</span>
+      <button id="sync-now">Sincronizar</button>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <section class="scramble">
+      <div class="scramble-text" id="scramble-text">Generando scramble…</div>
+      <div class="scramble-meta">
+        <button id="new-scramble">Otro scramble</button>
+        <span id="scramble-source"></span>
+      </div>
+    </section>
+
+    <section class="timer-surface" id="timer-surface">
+      <div>
+        <div class="time" id="time">0.00</div>
+        <div class="hint" id="hint">Manten el espacio hasta que se ponga verde</div>
+      </div>
+    </section>
+
+    <section class="stats" id="stats"></section>
+
+  </main>
+</div>
+
+<!-- ================= ajustes ================= -->
+<div class="modal-backdrop" id="settings-modal" hidden>
+  <div class="modal">
+    <h2>Ajustes</h2>
+    <p class="sub">Tus tiempos viven en este navegador. Exporta de vez en cuando.</p>
+
+    <div class="kv"><span>Solves en esta sesion</span><span id="info-count">—</span></div>
+    <div class="kv"><span>Almacenamiento persistente</span><span id="info-persist">—</span></div>
+    <div class="kv"><span>Espacio usado</span><span id="info-usage">—</span></div>
+    <div class="kv"><span>Scrambles</span><span id="info-scramble">—</span></div>
+    <div class="kv"><span>Pendientes de sincronizar</span><span id="info-pending">—</span></div>
+
+    <h2 style="margin-top:22px">Copia de seguridad</h2>
+    <p class="sub">
+      Esto es lo que te protege. Si limpias los datos del navegador o cambias de
+      dominio, sin un export no hay vuelta atras.
+    </p>
+    <div style="display:flex;gap:8px">
+      <button id="export-btn">Exportar JSON</button>
+      <button id="import-btn">Importar JSON</button>
+      <input type="file" id="import-file" accept="application/json,.json" hidden>
+    </div>
+
+    <h2 style="margin-top:22px">Sincronizacion</h2>
+    <p class="sub">
+      Opcional. Sin endpoint, la app funciona igual y todo se queda en local.
+    </p>
+    <div class="field">
+      <label for="sync-endpoint">Endpoint</label>
+      <input id="sync-endpoint" type="url" placeholder="https://tuservidor/sync" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="sync-token">Token</label>
+      <input id="sync-token" type="password" placeholder="cadena larga y aleatoria" autocomplete="off">
+      <div class="help">
+        Un secreto compartido que generas una vez y pegas en cada dispositivo.
+        Sin cuenta, sin email, sin contraseña.
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button id="settings-close">Cerrar</button>
+      <button id="settings-save">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
