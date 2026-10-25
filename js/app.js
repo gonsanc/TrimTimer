@@ -245,13 +245,33 @@ async function refreshInfo() {
   $('info-count').textContent = state.solves.length;
 
   const p = await db.requestPersistence();
-  $('info-persist').textContent = !p.supported ? 'no soportado' : p.granted ? 'concedido' : 'NO concedido';
+  const persistEl = $('info-persist');
+  if (!p.supported) {
+    persistEl.textContent = 'no soportado';
+    persistEl.title = '';
+  } else if (p.granted) {
+    persistEl.textContent = 'concedido';
+    persistEl.title = 'El navegador no desalojara estos datos bajo presion de disco.';
+  } else {
+    persistEl.textContent = 'NO concedido';
+    persistEl.title = 'Normal en desarrollo. Chrome suele concederlo cuando la app '
+      + 'esta instalada como PWA desde su dominio real. Exporta mientras tanto.';
+  }
 
   const est = await db.estimate();
   $('info-usage').textContent = est ? `${(est.usage / 1024).toFixed(0)} KB` : '—';
 
   $('info-scramble').textContent = scramble.isRandomState() ? 'estado aleatorio (WCA)' : 'respaldo (no WCA)';
-  $('info-pending').textContent = sync.getState().pending;
+
+  // Desglosado: la sesion tambien es un registro que viaja al servidor,
+  // asi que el total no coincide con el numero de solves.
+  const pend = await db.pending();
+  const nSolves = pend.solves.length;
+  const nSessions = pend.sessions.length;
+  const total = nSolves + nSessions;
+  $('info-pending').textContent = total === 0
+    ? '0'
+    : `${total}  ·  ${nSolves} solve${nSolves === 1 ? '' : 's'} + ${nSessions} sesi${nSessions === 1 ? 'on' : 'ones'}`;
 
   const cfg = await sync.getConfig();
   $('sync-endpoint').value = cfg.endpoint;
