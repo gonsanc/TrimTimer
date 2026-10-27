@@ -134,6 +134,16 @@ input, select, textarea {
 .time.holding { color: var(--holding); }
 .time.ready   { color: var(--ready); }
 
+/* Inspeccion: cuenta atras, no cronometro. Mas pequeña para que no se
+   confunda de un vistazo con un tiempo de resolucion. */
+.time.inspecting { font-size: clamp(56px, 13vw, 128px); color: var(--warn); }
+.time.over       { color: var(--holding); }
+
+/* Durante la inspeccion escondemos el scramble pero dejamos la pista:
+   ya has mirado el cubo, el scramble solo estorba. */
+body.inspecting .scramble,
+body.inspecting .stats { opacity: .15; transition: opacity .2s; }
+
 .hint {
   margin-top: 18px;
   font-size: 12px;
@@ -261,8 +271,21 @@ body.running .hint {
 .field .help { font-size: 11px; color: var(--dimmer); margin-top: 5px; line-height: 1.5; }
 .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
 
-.kv { display: flex; justify-content: space-between; font-size: 12px; padding: 7px 0; border-bottom: 1px solid var(--line); }
-.kv span:first-child { color: var(--dim); }
+.kv { display: flex; justify-content: space-between; gap: 14px; font-size: 12px; padding: 7px 0; border-bottom: 1px solid var(--line); }
+.kv span:first-child { color: var(--dim); flex: none; }
+.kv span:last-child { text-align: right; }
+
+.toggle {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+}
+.toggle input { width: auto; margin: 2px 0 0; accent-color: var(--accent); flex: none; }
+.toggle strong { display: block; font-size: 13px; font-weight: 500; }
+.toggle em { display: block; font-style: normal; font-size: 11px; color: var(--dimmer); margin-top: 3px; line-height: 1.5; }
 
 /* ================= movil ================= */
 

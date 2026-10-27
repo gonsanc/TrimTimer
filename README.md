@@ -18,10 +18,10 @@ Hecho:
 - Export / import JSON
 - PWA instalable (manifest + service worker)
 - Responsive
+- **Inspección WCA**: 15 s, avisos sonoros a los 8 y 12, +2 entre 15 y 17, DNF a partir de 17
 
 Siguiente:
 
-- Inspección WCA de 15s con avisos a los 8 y 12, +2 entre 15 y 17, DNF a partir de 17
 - Gráfico de evolución
 - Backend de sincronización
 - Envoltorio Capacitor
@@ -39,6 +39,7 @@ Para los tests de las medias, que es la parte donde más fácil es meter la pata
 
 ```sh
 node test/stats.test.mjs
+node test/inspection.test.mjs
 ```
 
 > `package.json` existe **solo** para que node trate los `.js` como módulos ES.
@@ -62,6 +63,11 @@ iconos de 192 y 512, y `start_url` dentro del scope. Todo está puesto.
 | `2` | Alterna +2 en el último solve |
 | `D` | Alterna DNF en el último solve |
 | `Supr` / `Retroceso` | Borra el último solve |
+| `Esc` | Cancela la inspección en curso |
+
+Con la inspección activada, un toque de espacio la arranca; a partir de ahí
+mantienes y sueltas como siempre. La penalización se fija **en el instante de
+arrancar el cronómetro**, no al pararlo.
 
 ## Decisiones que no son obvias
 

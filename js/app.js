@@ -4,6 +4,7 @@ import * as db from './db.js';
 import * as stats from './stats.js';
 import * as scramble from './scramble.js';
 import * as sync from './sync.js';
+import * as sound from './sound.js';
 import { Timer, bindInput } from './timer.js';
 
 const $ = (id) => document.getElementById(id);
@@ -37,27 +38,53 @@ const timer = new Timer({
   onState: (s) => {
     el.time.classList.toggle('holding', s === 'holding');
     el.time.classList.toggle('ready', s === 'ready');
+    el.time.classList.toggle('inspecting', s === 'inspecting');
     document.body.classList.toggle('running', s === 'running');
+    document.body.classList.toggle('inspecting', s === 'inspecting' || s === 'holding' || s === 'ready');
 
     if (s === 'holding') el.hint.textContent = 'Sigue…';
     else if (s === 'ready') el.hint.textContent = 'Suelta';
-    else if (s === 'idle') el.hint.textContent = 'Manten el espacio hasta que se ponga verde';
+    else if (s === 'inspecting') el.hint.textContent = 'Inspeccion — manten el espacio para armar · Esc cancela';
+    else if (s === 'idle') {
+      el.time.classList.remove('over');
+      el.hint.textContent = timer.inspectionEnabled
+        ? 'Pulsa espacio para empezar la inspeccion'
+        : 'Manten el espacio hasta que se ponga verde';
+    }
   },
+
   onTick: (ms) => { el.time.textContent = stats.fmt(ms); },
-  onResult: (ms) => { void saveSolve(ms); },
+
+  // Durante la inspeccion el display es una cuenta atras, no un cronometro.
+  onInspection: ({ label, penalty }) => {
+    el.time.textContent = label;
+    el.time.classList.toggle('over', penalty !== 'none');
+  },
+
+  onCue: (at) => {
+    if (at === 8) sound.cue8();
+    else if (at === 12) sound.cue12();
+    else if (at === 15) sound.cueOver();
+  },
+
+  onResult: ({ ms, penalty }) => { void saveSolve(ms, penalty); },
 });
 
-bindInput(timer, el.surface);
+// unlock() tiene que ir en un gesto real del usuario o el navegador
+// deja el AudioContext suspendido y no suena nada en movil.
+bindInput(timer, el.surface, { onFirstGesture: () => sound.unlock() });
 
-async function saveSolve(ms) {
+async function saveSolve(ms, penalty = 'none') {
   const solve = db.newSolve({
     sessionId: state.session.id,
     ms,
     scramble: state.scramble,
   });
+  solve.penalty = penalty;      // penalizacion heredada de la inspeccion
 
   await db.putSolve(solve);     // 1. IndexedDB primero
   state.solves.push(solve);
+  el.time.textContent = stats.fmtSolve(solve);
   renderSolves();               // 2. UI ya actualizada
   renderStats();
   sync.schedule();              // 3. sincronizacion sin await, nunca bloquea
@@ -273,6 +300,9 @@ async function refreshInfo() {
     ? '0'
     : `${total}  ·  ${nSolves} solve${nSolves === 1 ? '' : 's'} + ${nSessions} sesi${nSessions === 1 ? 'on' : 'ones'}`;
 
+  $('opt-inspection').checked = timer.inspectionEnabled;
+  $('opt-sound').checked = sound.isEnabled();
+
   const cfg = await sync.getConfig();
   $('sync-endpoint').value = cfg.endpoint;
   $('sync-token').value = cfg.token;
@@ -285,6 +315,27 @@ $('settings-save').addEventListener('click', async () => {
   });
   openModal(false);
 });
+
+/* ---------- preferencias ---------- */
+
+$('opt-inspection').addEventListener('change', async (e) => {
+  timer.setInspection(e.target.checked);
+  await db.setMeta('inspection', e.target.checked);
+  timer.onState('idle');   // refresca el texto de ayuda
+});
+
+$('opt-sound').addEventListener('change', async (e) => {
+  sound.setEnabled(e.target.checked);
+  await db.setMeta('sound', e.target.checked);
+  if (e.target.checked) { sound.unlock(); sound.cue8(); }  // confirmacion audible
+});
+
+async function loadPrefs() {
+  const inspection = await db.getMeta('inspection', false);
+  const snd = await db.getMeta('sound', true);
+  timer.setInspection(inspection);
+  sound.setEnabled(snd);
+}
 
 /* ---------- export / import ---------- */
 
@@ -326,6 +377,9 @@ async function init() {
   await db.open();
   state.session = await db.ensureSession();
   state.solves = await db.listSolves(state.session.id);
+
+  await loadPrefs();
+  timer.onState('idle');   // deja el texto de ayuda acorde a las preferencias
 
   await renderSessions();
   renderSolves();

@@ -8,7 +8,7 @@
 // NO cacheamos cubing.js: es otro origen y la app ya tiene un generador de
 // respaldo para cuando no hay red.
 
-const CACHE = 'trimtimer-v1';
+const CACHE = 'trimtimer-v2';
 
 const SHELL = [
   './',
@@ -21,6 +21,7 @@ const SHELL = [
   './js/stats.js',
   './js/scramble.js',
   './js/sync.js',
+  './js/sound.js',
   './icon-192.png',
   './icon-512.png',
 ];
